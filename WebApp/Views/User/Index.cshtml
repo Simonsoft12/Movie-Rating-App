@@ -1,0 +1,176 @@
+﻿@model IEnumerable<WebApp.Models.UserModel>
+
+@{
+    ViewBag.Title = "Index";
+}
+<script language="javascript" type="text/javascript">
+
+    var wsUri = "ws://localhost:8080/";
+    var output;
+
+    function init() {
+        output = document.getElementById("output");
+        testWebSocket();
+    }
+
+    function testWebSocket() {
+        websocket = new WebSocket(wsUri);
+        websocket.onopen = function (evt) { onOpen(evt) };
+        websocket.onclose = function (evt) { onClose(evt) };
+        websocket.onmessage = function (evt) { onMessage(evt) };
+        websocket.onerror = function (evt) { onError(evt) };
+    }
+
+    function onOpen(evt) {
+        var myObj = { msg_code: "ViewTable", data: "users" };
+        var myJSON = JSON.stringify(myObj);
+        doSend(myJSON);
+    }
+
+    function onClose(evt) {
+        writeToScreen("DISCONNECTED");
+        websocket.close();
+    }
+
+    function onError(evt) {
+        writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+    }
+
+    function doSend(message) {
+        writeToScreen("SENT: " + message);
+        websocket.send(message);
+    }
+
+    function onMessage(evt) {
+        let message = JSON.parse(evt.data);
+        writeToScreen('<span style="color: blue;"> RECEIVED : ' + evt.data + '</span><br/><br/><br/>')
+
+        if (message.msg_code === "ViewUsers") {
+            HandleViewUsers(message);
+        }
+    }
+
+    function HandleViewUsers(message) {
+        var dropdown = document.getElementById("SelectTable");
+
+        for (var i = 0; i < message.Users.length; ++i) {
+            dropdown[dropdown.length] = new Option(message.Users[i].name + ' ' + message.Users[i].surname, message.Users[i].id);
+        }
+
+        var keys = Object.keys(message.Users[0]);
+        const container = createContainer(keys);
+        document.getElementById('output').appendChild(container);
+
+        for (var i = 0; i < message.Users.length; i++) {
+            var values = Object.values(message.Users[i]);
+            const containerValues = createContainer2(values);
+            document.getElementById('output').appendChild(containerValues);
+        }
+        var values = Object.values(message.Users);
+    }
+
+    function writeToScreen(message) {
+        var pre = document.createElement("p");
+        pre.innerHTML = message;
+        output2.appendChild(pre);
+    }
+
+    function GoToAddUser() {
+        websocket.close();
+        window.location.href = "../User/AddUser/";
+    }
+
+    function GoToEditUser() {
+        dropdown = document.getElementById("SelectTable");
+        var value = dropdown.options[dropdown.selectedIndex].value;
+        if ('Choose a user' != value) {
+            websocket.close();
+            window.location.href = "../User/Edit/" + value;
+        }
+        else writeToScreen("Please choose a user ...");
+    }
+
+    function DeleteUser() {
+        dropdown = document.getElementById("SelectTable");
+        var value = dropdown.options[dropdown.selectedIndex].value;
+        if ('Choose a user' != value) {
+            var myObj = { msg_code: "DeleteUser", id: value };
+            var myJSON = JSON.stringify(myObj);
+            doSend(myJSON);
+        }
+        else writeToScreen("Please choose a user ...");
+    }
+
+    function createContainer(columns) {
+        function createDivWithClass(cls) {
+            const div = document.createElement('table');
+            div.classList.add(cls);
+            return div;
+        }
+
+        const container = createDivWithClass('table');
+        const row = document.createElement('tr');
+
+        container.appendChild(row);
+
+        for (let i = 0; i < columns.length; i++) {
+            const column = document.createElement('th');
+            column.classList.add('col-md-2')
+            column.textContent = columns[i];
+
+            row.appendChild(column);
+        }
+        return container;
+    }
+
+    function createContainer2(columns) {
+        function createDivWithClass(cls) {
+            const div = document.createElement('table');
+            div.classList.add(cls);
+            return div;
+        }
+
+        const container = createDivWithClass('table');
+        const row = document.createElement('tr');
+        container.appendChild(row);
+
+        for (let i = 0; i < columns.length; i++) {
+            const column = document.createElement('td');
+            column.classList.add('col-md-2')
+            column.textContent = columns[i];
+
+            row.appendChild(column);
+        }
+        var x = document.createElement("HR");
+        output.appendChild(x);
+        return container;
+    }
+
+    window.addEventListener("load", init, false);
+
+</script>
+&nbsp;&nbsp;&nbsp;
+<form id="myForm">
+    <select id="SelectTable">
+        <option>Choose a user</option>
+    </select>
+    &nbsp;&nbsp;&nbsp;<button onclick="GoToAddUser();  return false;">Add new</button>&nbsp;&nbsp;&nbsp;
+    <button onclick="GoToEditUser();  return false;">Edit</button>&nbsp;&nbsp;&nbsp;
+    <button onclick="DeleteUser();  return false;">Delete</button>
+</form>
+
+<h2>View users</h2>
+<br />
+
+<div id="output" />
+
+<div id="output2" class="form-control" style="overflow: auto; height: 140px;"></div>
+
+
+
+
+
+
+
+
+

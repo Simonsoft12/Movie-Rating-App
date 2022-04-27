@@ -1,0 +1,116 @@
+﻿@model WebApp.Models.RatingModel
+
+@{
+    ViewBag.Title = "AddRating";
+}
+
+<script language="javascript" type="text/javascript">
+
+    var wsUri = "ws://localhost:8080/";
+    var output;
+
+    function init() {
+        output = document.getElementById("output");
+        testWebSocket();
+    }
+
+    function testWebSocket() {
+        websocket = new WebSocket(wsUri);
+        websocket.onopen = function (evt) { onOpen(evt) };
+        websocket.onclose = function (evt) { onClose(evt) };
+        websocket.onmessage = function (evt) { onMessage(evt) };
+        websocket.onerror = function (evt) { onError(evt) };
+    }
+
+    function onOpen(evt) {
+        writeToScreen("CONNECTED ...");
+    }
+
+    function onClose(evt) {
+        writeToScreen("DISCONNECTED");
+        websocket.close();
+    }
+
+    function onError(evt) {
+        writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+    }
+
+    function doSend(message) {
+        writeToScreen("SENT: " + message);
+        websocket.send(message);
+    }
+
+    function onMessage(evt) {
+        let message = JSON.parse(evt.data);
+        writeToScreen('<span style="color: blue;"> RECEIVED : ' + evt.data + '</span><br/><br/><br/>')
+    }
+
+    function writeToScreen(message) {
+        var pre = document.createElement("p");
+        pre.innerHTML = message;
+        output.appendChild(pre);
+    }
+
+    function AddRating() {
+        var rating = document.getElementById("rating").value;
+        var movie_id = document.getElementById("movie_id").value;
+        var user_id = document.getElementById("user_id").value;
+        var myObj = { msg_code: "AddRating", rating: rating, movie_id: movie_id, user_id: user_id };
+        var myJSON = JSON.stringify(myObj);
+        doSend(myJSON);
+    }
+
+    window.addEventListener("load", init, false);
+
+</script>
+
+<h2>Add rating</h2>
+<br />
+
+<div id="output"></div>
+<br />
+<br />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>RatingModel</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.rating, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.rating, new { htmlAttributes = new { @class = "form-control", id = "rating" } })
+                @Html.ValidationMessageFor(model => model.rating, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.movie_id, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.movie_id, ViewBag.movie_id as IEnumerable<SelectListItem>, new { htmlAttributes = new { @class = "form-control", @id = "movie_id" } })
+                @Html.ValidationMessageFor(model => model.movie_id, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.user_id, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.user_id, ViewBag.client_id as IEnumerable<SelectListItem>, new { htmlAttributes = new { @class = "form-control", @id = "user_id" } })
+                @Html.ValidationMessageFor(model => model.user_id, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="text" onclick ="AddRating()" value="Add" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

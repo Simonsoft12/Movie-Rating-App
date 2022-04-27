@@ -1,0 +1,142 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<script language="javascript" type="text/javascript">
+
+    var wsUri = "ws://localhost:8080/";
+    var output;
+
+    function myFunction() {
+        var myObj = { msg_code: "AddMovie", title: "Warcraft" };
+        var myJSON = JSON.stringify(myObj);
+        doSend(myJSON);
+    }
+
+    function init() {
+        output = document.getElementById("output");
+        testWebSocket();
+    }
+
+    function combo() {
+        dropdown = document.getElementById("SelectTable");
+        var gettext = dropdown.options[dropdown.selectedIndex].text;
+        var myObj = { msg_code: "ViewTable", data: gettext };
+        var myJSON = JSON.stringify(myObj);
+        doSend(myJSON);
+    }
+
+    function testWebSocket() {
+        websocket = new WebSocket(wsUri);
+        websocket.onopen = function (evt) { onOpen(evt) };
+        websocket.onclose = function (evt) { onClose(evt) };
+        websocket.onmessage = function (evt) { onMessage(evt) };
+        websocket.onerror = function (evt) { onError(evt) };
+    }
+
+    function onOpen(evt) {
+        writeToScreen("CONNECTED ...");
+    }
+
+    function onClose(evt) {
+        writeToScreen("DISCONNECTED");
+        websocket.close();
+    }
+
+    function onError(evt) {
+        writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+    }
+
+    function doSend(message) {
+        writeToScreen("SENT: " + message);
+        websocket.send(message);
+    }
+
+    function onMessage(evt) {
+        let message = JSON.parse(evt.data);
+        writeToScreen('<span style="color: blue;"> RECEIVED : ' + evt.data + '</span><br/><br/><br/>')
+
+        if (message.msg_code === "ViewTables") {
+            HandleViewTables(message.tableName);
+        } else if (message.msg_code === "ViewUsers") {
+            HandleViewUsers(message);
+        } else if (message.msg_code === "ViewMovies") {
+            HandleViewMovies(message);
+        } else if (message.msg_code === "ViewRatings") {
+            HandleViewRatings(message);
+        }
+    }
+
+    function HandleViewTables(message) {
+        var dropdown = document.getElementById("SelectTable");
+
+        for (var i = 0; i < message.length; ++i) {
+            dropdown[dropdown.length] = new Option(message[i], message[i]);
+        }
+    }
+
+    function HandleViewUsers(message) {
+        websocket.close();
+        window.location.href = "../User/Index/";
+    }
+
+    function HandleViewMovies(message) {
+        websocket.close();
+        window.location.href = "../Movie/Index/";
+    }
+
+    function HandleViewRatings(message) {
+        websocket.close();
+        window.location.href = "../Rating/Index/";
+    }
+
+    function CheckExistingTables() {
+        var myObj = { msg_code: "ViewTables" };
+        var myJSON = JSON.stringify(myObj);
+        doSend(myJSON);
+    }
+
+    function writeToScreen(message) {
+        var pre = document.createElement("p");
+        pre.style.wordWrap = "break-word";
+        pre.innerHTML = message;
+        output.appendChild(pre);
+    }
+
+    window.addEventListener("load", init, false);
+
+</script>
+&nbsp;&nbsp;&nbsp;
+<form id="myForm">
+    <select id="SelectTable">
+        <option>Choose a table</option>
+    </select>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <button onclick="combo();  return false;">Display</button>
+</form>
+<br />
+
+<div id="output" class="form-control" style="overflow: auto; height: 140px;"></div>
+
+<br />
+<br />
+<br />
+<br />
+
+<div class="jumbotron">
+    <h1>ASP.NET</h1>
+    <p class="lead">ASP.NET MVC Web Application for rating favourite movies.<br />Combined with Postgresql database with Github connection.</p>
+    <p><a class="btn btn-primary btn-lg" onclick="CheckExistingTables()">Check for existing tables &raquo;</a></p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Getting started</h2>
+        <p>
+            Add new users. <br />
+            Add new movies. <br />
+            Then add new ratings !
+        </p>
+        <p><a class="btn btn-default" onclick="CheckExistingTables()">Check for existing tables &raquo;</a></p>
+    </div>
+</div>

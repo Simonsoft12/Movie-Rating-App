@@ -1,0 +1,96 @@
+﻿@model WebApp.Models.MovieModel
+
+@{
+    ViewBag.Title = "AddMovie";
+}
+
+<script language="javascript" type="text/javascript">
+
+    var wsUri = "ws://localhost:8080/";
+    var output;
+
+    function init() {
+        output = document.getElementById("output");
+        testWebSocket();
+    }
+
+    function testWebSocket() {
+        websocket = new WebSocket(wsUri);
+        websocket.onopen = function (evt) { onOpen(evt) };
+        websocket.onclose = function (evt) { onClose(evt) };
+        websocket.onmessage = function (evt) { onMessage(evt) };
+        websocket.onerror = function (evt) { onError(evt) };
+    }
+
+    function onOpen(evt) {
+        writeToScreen("CONNECTED ...");
+    }
+
+    function onClose(evt) {
+        writeToScreen("DISCONNECTED");
+        websocket.close();
+    }
+
+    function onError(evt) {
+        writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+    }
+
+    function doSend(message) {
+        writeToScreen("SENT: " + message);
+        websocket.send(message);
+    }
+
+    function onMessage(evt) {
+        let message = JSON.parse(evt.data);
+        writeToScreen('<span style="color: blue;"> RECEIVED : ' + evt.data + '</span><br/><br/><br/>')
+    }
+
+    function writeToScreen(message) {
+        var pre = document.createElement("p");
+        pre.innerHTML = message;
+        output.appendChild(pre);
+    }
+
+    function AddMovie() {
+        var title = document.getElementById("title").value;
+        var myObj = { msg_code: "AddMovie", title: title };
+        var myJSON = JSON.stringify(myObj);
+        doSend(myJSON);
+    }
+
+    window.addEventListener("load", init, false);
+
+</script>
+
+<h2>Add movie</h2><br />
+
+<div id="output"></div><br /><br />
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Add new movie to the database.</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.title, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.title, new { htmlAttributes = new { @class = "form-control" , @id = "title"} })
+                @Html.ValidationMessageFor(model => model.title, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="text" onclick ="AddMovie()" value="Add" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
