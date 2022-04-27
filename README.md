@@ -1,6 +1,8 @@
 # Movie Rating App - .Net 4.7.2 Core MVC with PostreSQL database connection using WebSockets.
 
-Add users. Add movies. Add movie ratings.
+Add users. 
+Add movies. 
+Add movie ratings.
 
 <h1>How to Begin:</h1>
 
