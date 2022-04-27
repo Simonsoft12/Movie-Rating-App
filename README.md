@@ -1,4 +1,4 @@
-# Movie Rating App - .Net 4.7.2 Core MVC with PostreSQL database connection using WebSockets.
+# Movie Rating App - .Net 4.7.2 Core MVC, Dapper, PostreSQL, WebSockets.
 
 Add users.<br/>
 Add movies. <br/>
@@ -10,4 +10,4 @@ Add movie ratings.<br/>
 2. Open project & navigate to <b>DataLibrary.DataAccess.PostgresDataAccess.cs</b> class and change PostgreSQL <b>connection string</b> to match your own.
 3. Compile & Run.
 
-ORM used - Dapper.
+
