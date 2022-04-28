@@ -1,7 +1,7 @@
 <b>Movie Rating App</b> - .Net-4.7.2 Core MVC, Dapper, PostreSQL, WebSockets.
 
+Add users.<br/>
 Add movies.<br/>
-Add ratings.<br/>
 Add movie ratings.
 
 <h1>How to begin:</h1>
