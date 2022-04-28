@@ -1,6 +1,3 @@
-# MovieRatingApp-.Net-4.7.2-Core-MVC-Dapper-PostreSQL-WebSockets
-
-
 Simple <b>Movie Rating App</b> .Net-4.7.2Core MVC, Dapper, PostreSQL, WebSockets
 
 <h1>How to begin:</h1>
